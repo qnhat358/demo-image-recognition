@@ -1,0 +1,66 @@
+  /* semantic color variables for this project */
+  :root {
+      --primary: #01ACB4;
+      --second: #787C85;
+      --color-background: #E6E6E6;
+      --color-background-dark: #708292;
+      --color-text: #4B5056;
+  }
+
+  .btn-primary {
+      background-color: var(--primary) !important;
+      border: 0 !important;
+  }
+
+  .btn-primary:hover {
+      opacity: 0.9;
+  }
+
+  .btn-add {
+      background: transparent;
+      border: 0px;
+      height: 80px;
+      width: 600px;
+      background-image: url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' rx='10' ry='10' stroke='%234B5056FF' stroke-width='4' stroke-dasharray='6%2c 14' stroke-dashoffset='0' stroke-linecap='square'/%3e%3c/svg%3e");
+      border-radius: 10px;
+  }
+
+  .btn-add:hover {
+      background-image: url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' rx='10' ry='10' stroke='%2301ACB4FF' stroke-width='4' stroke-dasharray='6%2c 14' stroke-dashoffset='0' stroke-linecap='square'/%3e%3c/svg%3e");
+      color: var(--primary);
+  }
+
+  .card-disabled {
+      opacity: 0.6;
+  }
+
+  p,
+  span {
+      color: var(--color-text)
+  }
+
+  .class-card {
+
+      /* width */
+      ::-webkit-scrollbar {
+          width: 5px;
+          height: 5px;
+          padding-top: 4px;
+      }
+
+      /* Track */
+      ::-webkit-scrollbar-track {
+          background: #f1f1f1;
+      }
+
+      /* Handle */
+      ::-webkit-scrollbar-thumb {
+          background: var(--primary);
+          border-radius: 50px;
+      }
+
+      /* Handle on hover */
+      ::-webkit-scrollbar-thumb:hover {
+          background: #555;
+      }
+  }
