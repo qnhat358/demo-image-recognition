@@ -141,6 +141,21 @@ const drawCurvedLines = () => {
 
 const trainModelHandle = () => {
   console.log(classList.value);
+  classList.value.map(async(el) => {
+    if (el.images.length > 0) {
+      el.images.map(async(image)=>{
+        // https://attendance.ily1606.space/upload/?name=aaa
+        let imgFormData = new FormData();
+        imgFormData.append('file', image);
+        const config = {
+          method: 'POST',
+          mode: "cors",
+          body: imgFormData
+        };
+        await fetch(`https://attendance.ily1606.space/upload/?name=${el.name}`, config);
+      })
+    }
+  })
 }
 
 let previewInterval;
@@ -155,9 +170,9 @@ const previewCameraHandle = async () => {
       mode: "cors",
       body: imgFormData
     };
-    const response = await fetch('http://translator.paraceltech.com/api/detect', config);
+    const response = await fetch('https://attendance.ily1606.space/api/detect', config);
     const jsonResponse = await response.json();
-    resultMessage.value = jsonResponse.mss.result_text;
+    
 
     const frame = jsonResponse.mss.image_bbox;
     // Accessing the canvas 2D context
@@ -166,6 +181,9 @@ const previewCameraHandle = async () => {
     // Draw a rectangle
     ctx.strokeStyle = 'red';
     ctx.strokeRect(frame[0], frame[1], frame[2], frame[3]); // Rectangle position (x, y) and dimensions (width, height)
+
+    resultMessage.value = jsonResponse.mss.result_text;
+    if (jsonResponse.mss.attend) stopPreview();
   }, 500)
 }
 

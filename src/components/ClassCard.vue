@@ -48,6 +48,9 @@
         </div>
       </div>
     </div>
+    <div class="alert alert-warning" role="alert" style="position: fixed; bottom: 0; left: 50%; transform: translate(-50%, 0px); z-index: 100;" v-if="displayAlert">
+      You can upload a maximum of 20 images.
+    </div>
   </div>
 </template>
 <script setup>
@@ -77,6 +80,7 @@ const showWebcam = ref(false);
 const imageUploadRef = ref(null);
 const cameraRef = ref(null);
 const imageUrls = ref([]);
+const displayAlert = ref(false);
 
 const images = computed({
   get() {
@@ -90,6 +94,13 @@ const images = computed({
 
 const onFileChange = (e) => {
   const files = e.target.files;
+  if (files.length > 20){
+    displayAlert.value = true;
+    setTimeout(()=>{
+      displayAlert.value = false;
+    }, 5000)
+    return;
+  }
   for (let index = 0; index < files.length; index++) {
     images.value.push(files[index]);
     imageUrls.value.push(URL.createObjectURL(files[index]));
@@ -101,7 +112,15 @@ const onFileChange = (e) => {
 let recordInterval;
 const startRecord = async () => {
   recordInterval = setInterval(async()=>{
-    const value = await cameraRef.value.snapshot();
+    if (images.value.length == 20){
+    stopRecord();
+    displayAlert.value = true;
+    setTimeout(()=>{
+      displayAlert.value = false;
+    }, 5000)
+    return;
+  }
+    const value = await cameraRef.value.snapshot({ width: 600, height: 600 });
     images.value.push(value);
     imageUrls.value.push(URL.createObjectURL(value));
   }, 100)
