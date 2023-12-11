@@ -2,19 +2,20 @@
   <div v-if="showCamera" class="modal d-flex" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered modal-xl">
       <div class="modal-content">
-        <div class="modal-header">
+        <div class="modal-header p-1 px-3">
           <h5 class="modal-title">Preview Result</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
             @click="showCamera = false"></button>
         </div>
         <div class="modal-body p-0" style="position: relative;">
-          <camera :resolution="{ width: CAMERA_WIDTH, height: CAMERA_WIDTH }" ref="cameraRef" autoplay @started="previewCameraHandle"
-            @stopped="stopPreview">
+          <camera :resolution="{ width: CAMERA_WIDTH, height: CAMERA_WIDTH }" ref="cameraRef" autoplay
+            @started="previewCameraHandle" @stopped="stopPreview">
           </camera>
-          <canvas ref="canvas" :width="CAMERA_WIDTH" :height="CAMERA_WIDTH" style="position: absolute; top: 0; left: 0;"></canvas>
+          <canvas ref="canvas" :width="CAMERA_WIDTH" :height="CAMERA_WIDTH"
+            style="position: absolute; top: 0; left: 0;"></canvas>
         </div>
-        <div class="modal-footer">
-          <p>{{ resultMessage }}</p>
+        <div class="modal-footer p-1 px-3 d-inline-block" style="max-width: 500px; overflow:hidden; white-space: nowrap; text-overflow: ellipsis;">
+          <p>{{ resultMessage.join(', ') }}</p>
         </div>
       </div>
     </div>
@@ -50,18 +51,22 @@
     style="overflow: auto; min-height: 100vh; background-color: var(--color-background);">
     <div class="d-flex flex-column p-5">
       <ClassCard v-for="(n, index) in classList" :key=index :id="`class-card-${index}`" :name="n.name" :images="n.images"
-        :disable="n.isDisable" class="mb-3" @remove="removeClass(index)" @disable="n.isDisable = true"
-        @enable="n.isDisable = false"></ClassCard>
+        :disable="n.isDisable" class="mb-3" @update:name="(name) => n.name = name" @remove="removeClass(index)"
+        @disable="n.isDisable = true" @enable="n.isDisable = false"></ClassCard>
       <button class="btn-add fw-semibold" @click="addClass">
         Add a class
       </button>
     </div>
     <div class="center-vertical" style="left: 750px">
       <div class="card shadow" style="width: 150px" id="train-card">
-        <div class="d-flex flex-column p-3 text-center">
+        <div class="d-flex flex-column p-3 text-center align-items-center">
           <p class="fw-bold">Training</p>
-          <button type="button" class="btn btn-outline-secondary fw-semibold" @click="trainModelHandle">Train
+          <button v-if="!isTraining" type="button" class="btn btn-outline-secondary fw-semibold"
+            @click="trainModelHandle">Train
             model</button>
+          <div v-else class="spinner-border" role="status">
+            <span class="visually-hidden">Loading...</span>
+          </div>
         </div>
       </div>
     </div>
@@ -88,11 +93,13 @@ import Camera from 'simple-vue-camera';
 
 const showCamera = ref(false);
 const cameraRef = ref(null);
-const CAMERA_WIDTH = '600';
-const CAMERA_HEIGHT = '600';
+const CAMERA_WIDTH = '500';
+const CAMERA_HEIGHT = '500';
 
 const canvas = ref(null);
-const resultMessage = ref('');
+const resultMessage = ref([]);
+
+const isTraining = ref(false);
 
 const classList = ref([
   {
@@ -139,23 +146,30 @@ const drawCurvedLines = () => {
   }))
 };
 
-const trainModelHandle = () => {
+const trainModelHandle = async () => {
   console.log(classList.value);
-  classList.value.map(async(el) => {
-    if (el.images.length > 0) {
-      el.images.map(async(image)=>{
-        // https://attendance.ily1606.space/upload/?name=aaa
-        let imgFormData = new FormData();
-        imgFormData.append('file', image);
-        const config = {
-          method: 'POST',
-          mode: "cors",
-          body: imgFormData
-        };
-        await fetch(`https://attendance.ily1606.space/upload/?name=${el.name}`, config);
-      })
-    }
-  })
+  isTraining.value = true;
+  try {
+    let promises = [];
+    classList.value.map(async (el) => {
+      if (el.images.length > 0) {
+        el.images.map(async (image) => {
+          // https://attendance.ily1606.space/upload/?name=aaa
+          let imgFormData = new FormData();
+          imgFormData.append('file', image);
+          const config = {
+            method: 'POST',
+            mode: "cors",
+            body: imgFormData
+          };
+          promises.push(fetch(`https://attendance.ily1606.space/upload/?name=${el.name}`, config));
+        })
+      }
+    })
+    await Promise.all(promises);
+  } finally {
+    isTraining.value = false;
+  }
 }
 
 let previewInterval;
@@ -172,7 +186,7 @@ const previewCameraHandle = async () => {
     };
     const response = await fetch('https://attendance.ily1606.space/api/detect', config);
     const jsonResponse = await response.json();
-    
+
 
     const frame = jsonResponse.mss.image_bbox;
     // Accessing the canvas 2D context
@@ -182,8 +196,21 @@ const previewCameraHandle = async () => {
     ctx.strokeStyle = 'red';
     ctx.strokeRect(frame[0], frame[1], frame[2], frame[3]); // Rectangle position (x, y) and dimensions (width, height)
 
-    resultMessage.value = jsonResponse.mss.result_text;
-    if (jsonResponse.mss.attend) stopPreview();
+    const resultText = jsonResponse.mss.result_text;
+
+    // Write text above the rectangle
+    ctx.fillStyle = 'red';
+    ctx.font = '14px Arial';
+    const textWidth = ctx.measureText(resultText).width;
+    const textX = frame[0] + (frame[2] - textWidth) / 2; // Center text horizontally
+    const textY = frame[1] - 10; // Place text 10 pixels above the rectangle
+    ctx.fillText(resultText, textX, textY);
+
+
+    if (jsonResponse.mss.attend) {
+      if (!resultMessage.value.includes(resultText))
+      resultMessage.value.push(resultText);
+    }
   }, 500)
 }
 
