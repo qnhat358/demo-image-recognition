@@ -49,30 +49,31 @@
   </div> -->
   <div class="container-fluid d-flex flex-row justify-content-between"
     style="overflow: auto; min-height: 100vh; background-color: var(--color-background);">
-    <div class="d-flex flex-column p-5">
+    <div class="d-flex flex-column py-3" style="width: 45%">
       <ClassCard v-for="(n, index) in classList" :key=index :id="`class-card-${index}`" :name="n.name" :images="n.images"
         :disable="n.isDisable" class="mb-3" @update:name="(name) => n.name = name" @remove="removeClass(index)"
         @disable="n.isDisable = true" @enable="n.isDisable = false"></ClassCard>
       <button class="btn-add fw-semibold" @click="addClass">
-        Add a class
+        Add new student
       </button>
     </div>
-    <div class="center-vertical" style="left: 750px">
-      <div class="card shadow" style="width: 150px" id="train-card">
-        <div class="d-flex flex-column p-3 text-center align-items-center">
-          <p class="fw-bold">Training</p>
+    <div class="center-vertical" style="left: 50%; width: 15%;">
+      <div class="card shadow" id="train-card">
+        <div class="card-header d-flex flex-row justify-content-between align-items-center">
+          <span class="fw-bold">Training</span>
+        </div>
+        <div class="card-body d-flex flex-column p-3 text-center align-items-center">
           <button v-if="!isTraining" type="button" class="btn btn-outline-secondary fw-semibold"
-            @click="trainModelHandle">Train
-            model</button>
+            @click="trainModelHandle">Send images</button>
           <div v-else class="spinner-border" role="status">
             <span class="visually-hidden">Loading...</span>
           </div>
         </div>
       </div>
     </div>
-    <div class="center-vertical" style="left: 1050px">
+    <div class="center-vertical" style="right: 12px">
       <div class="card shadow" style="width: 300px" id="preview-card">
-        <div class="card-header d-flex flex-row justify-content-between  align-items-center">
+        <div class="card-header d-flex flex-row justify-content-between align-items-center">
           <span class="fw-bold">Preview</span>
           <button v-if="!showCamera" type="button" class="btn btn-outline-secondary fw-semibold"
             @click="showCamera = true">Export model</button>
@@ -103,12 +104,12 @@ const isTraining = ref(false);
 
 const classList = ref([
   {
-    name: 'Class 1',
+    name: 'Student 1',
     images: [],
     isDisable: false,
   },
   {
-    name: 'Class 2',
+    name: 'Student 2',
     images: [],
     isDisable: false,
   },
@@ -116,7 +117,7 @@ const classList = ref([
 
 const addClass = () => {
   classList.value.push({
-    name: `Class ${classList.value.length + 1}`,
+    name: `Student ${classList.value.length + 1}`,
     images: [],
     isDisable: false
   })

@@ -1,5 +1,5 @@
 <template>
-  <div class="card shadow class-card" :class="{ 'card-disabled shadow-none': disable }" style="width: 600px;">
+  <div class="card shadow class-card" :class="{ 'card-disabled shadow-none': disable }">
     <div class="card-header d-flex justify-content-between align-items-center">
       <div class="d-flex justify-content-between align-items-center">
         <span v-if="!isEditing" class="fw-bold">{{ name }}</span>
@@ -35,8 +35,8 @@
         <p v-if="images.length == 0">Add image sample:</p>
         <p v-else>{{ images.length }} image samples</p>
         <div class="d-flex flex-row">
-          <button type="button" class="btn btn-primary text-white me-2 fw-semibold p-0 flex-shrink-0"
-            style="width: 80px; height: 80px; font-size: 14px;" @click="showWebcam = true">Webcam</button>
+          <!-- <button type="button" class="btn btn-primary text-white me-2 fw-semibold p-0 flex-shrink-0"
+            style="width: 80px; height: 80px; font-size: 14px;" @click="showWebcam = true">Webcam</button> -->
           <button type="button" class="btn btn-primary text-white fw-semibold p-0 me-2 flex-shrink-0"
             @click="imageUploadRef.click()" style="width: 80px; height: 80px; font-size: 14px;">Upload</button>
           <input ref="imageUploadRef" type="file" accept="image/*" multiple style="display: none;" @change="onFileChange">
@@ -127,8 +127,6 @@ const onFileChange = (e) => {
     images.value.push(files[index]);
     imageUrls.value.push(URL.createObjectURL(files[index]));
   }
-  console.log(images.value);
-  console.log(imageUrls.value);
 }
 
 let recordInterval;
@@ -148,7 +146,6 @@ const startRecord = async () => {
   }, 100)
 }
 const stopRecord = () => {
-  console.log('stop');
   clearInterval(recordInterval)
 }
 
