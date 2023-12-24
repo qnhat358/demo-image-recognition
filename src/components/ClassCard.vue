@@ -35,8 +35,8 @@
         <p v-if="images.length == 0">Add image sample:</p>
         <p v-else>{{ images.length }} image samples</p>
         <div class="d-flex flex-row">
-          <!-- <button type="button" class="btn btn-primary text-white me-2 fw-semibold p-0 flex-shrink-0"
-            style="width: 80px; height: 80px; font-size: 14px;" @click="showWebcam = true">Webcam</button> -->
+          <button type="button" class="btn btn-primary text-white me-2 fw-semibold p-0 flex-shrink-0"
+            style="width: 80px; height: 80px; font-size: 14px;" @click="emit('preview')">Webcam</button>
           <button type="button" class="btn btn-primary text-white fw-semibold p-0 me-2 flex-shrink-0"
             @click="imageUploadRef.click()" style="width: 80px; height: 80px; font-size: 14px;">Upload</button>
           <input ref="imageUploadRef" type="file" accept="image/*" multiple style="display: none;" @change="onFileChange">
@@ -87,7 +87,7 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['remove', 'disable', 'enable', 'update:images', 'update:name'])
+const emit = defineEmits(['remove', 'disable', 'enable', 'update:images', 'update:name', 'preview'])
 
 const showMenu = ref(false);
 const showWebcam = ref(false);
