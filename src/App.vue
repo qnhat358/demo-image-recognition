@@ -25,22 +25,34 @@
       <ClassCard :name="classItem.name" :images="classItem.images"
         :disable="classItem.isDisable" class="mb-3" @update:name="(name) => classItem.name = name"
         @preview="showCamera = true" @remove="removeClass(index)"
-        @disable="classItem.isDisable = true" @enable="classItem.isDisable = false"></ClassCard>
+        @disable="classItem.isDisable = true" @enable="classItem.isDisable = false">
+        <template #training>
+          <!-- TRAINING -->
+          <div class="card shadow" id="train-card">
+            <div class="card-header d-flex flex-row justify-content-between align-items-center">
+              <span class="fw-bold">Training</span>
+            </div>
+            <div class="d-flex justify-content-between">
+              <div class="d-flex flex-column p-3 text-center align-items-center">
+                <button v-if="!isImageSending" type="button" class="btn btn-outline-secondary fw-semibold"
+                  @click="sendImageHandle">Send images</button>
+                <div v-else class="spinner-border" role="status">
+                  <span class="visually-hidden">Loading...</span>
+                </div>
+              </div>
+              <div class="d-flex flex-column p-3 text-center align-items-center">
+                <button :disabled="!isSentMesasge" v-if="!isTraining" type="button" class="btn btn-outline-success fw-semibold"
+                  @click="trainModelHandle">Train model</button>
+                <div v-else class="spinner-border" role="status">
+                  <span class="visually-hidden">Loading...</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </template>
+      </ClassCard>
     </div>
 
-    <!-- TRAINING -->
-    <div class="card shadow" id="train-card">
-      <div class="card-header d-flex flex-row justify-content-between align-items-center">
-        <span class="fw-bold">Training</span>
-      </div>
-      <div class="card-body d-flex flex-column p-3 text-center align-items-center">
-        <button v-if="!isTraining" type="button" class="btn btn-outline-secondary fw-semibold"
-          @click="trainModelHandle">Send images</button>
-        <div v-else class="spinner-border" role="status">
-          <span class="visually-hidden">Loading...</span>
-        </div>
-      </div>
-    </div>
   </div>
 </template>
 
@@ -64,7 +76,9 @@ const CAMERA_HEIGHT = '400';
 const canvas = ref(null);
 const resultMessage = ref([]);
 
+const isImageSending = ref(false);
 const isTraining = ref(false);
+const isSentMesasge = ref(false);
 
 const classItem = ref(
   {
@@ -74,8 +88,8 @@ const classItem = ref(
   }
 );
 
-const trainModelHandle = async () => {
-  isTraining.value = true;
+const sendImageHandle = async () => {
+  isImageSending.value = true;
   try {
     let promises = [];
     if (classItem.value.images.length > 0) {
@@ -88,11 +102,33 @@ const trainModelHandle = async () => {
         mode: "cors",
         body: imgFormData
       };
-     await fetch(`https://86db-203-205-51-20.ngrok-free.app/upload/?folder_name=${classItem.value.name}`, config);
+     const res = await fetch(`https://86db-203-205-51-20.ngrok-free.app/upload?folder_name=${classItem.value.name}`, config)
+     .then((res) => res.json());
+     if(res?.message) {
+      isSentMesasge.value = true 
+      $toast.success(res.message, {position: 'bottom'});
+     }
     }
   } finally {
-    isTraining.value = false;
+    isImageSending.value = false;
   }
+}
+
+const trainModelHandle = async () => {
+  isTraining.value = true;
+
+  await fetch("https://86db-203-205-51-20.ngrok-free.app/train_model")
+  .then((res) => res.json())
+  .then((res) => {
+    $toast.success(res.message, {position: 'bottom'});
+  })
+  .catch((err) => {
+    let message = err.message || "Error while fetching train model"
+    $toast.error(message, {position: 'bottom'});
+  })
+  .finally(() => {
+    isTraining.value = false;
+  })
 }
 
 let previewInterval;

@@ -33,7 +33,14 @@
     <div class="card-body p-0">
       <div v-if="!showWebcam" class="p-3 fw-semibold">
         <p v-if="images.length == 0">Add image sample:</p>
-        <p v-else>{{ images.length }} image samples</p>
+        <div v-else class="row">
+          <div class="col">{{ images.length }} image samples</div>
+          <div class="col-auto">
+            <button class="btn btn-outline-danger fw-semibold" @click="deleteAllImages()">
+              Reset 
+            </button>
+          </div>
+        </div>
         <div class="d-flex flex-row">
           <button type="button" class="btn btn-primary text-white me-2 fw-semibold p-0 flex-shrink-0"
             style="width: 80px; height: 80px; font-size: 14px;" @click="emit('preview')">Webcam</button>
@@ -41,8 +48,15 @@
             @click="imageUploadRef.click()" style="width: 80px; height: 80px; font-size: 14px;">Upload</button>
           <input ref="imageUploadRef" type="file" accept="image/*" multiple style="display: none;" @change="onFileChange">
           <div class="d-flex flex-row" style="overflow-x: auto;">
-            <img v-for="image in imageUrls" :src="image" class="me-2 rounded-2"
-              style="width: 80px; height: 80px; object-fit: contain;">
+            <div class="position-relative me-2" v-for="(image, i) in imageUrls" :key="i">
+              <img :src="image" class="me-2 rounded-2"
+                style="width: 80px; height: 80px; object-fit: cover;">
+              <div @click="deleteImage(i)" class="position-absolute bg-danger text-white rounded-circle d-flex justify-content-center align-items-center" style="top: 0px; right: 10px; width: 20px; height: 20px; cursor: pointer">
+                <svg focusable="false" data-icon="delete" width="1em" height="1em" fill="currentColor" aria-hidden="true" viewBox="64 64 896 896">
+                  <path d="M360 184h-8c4.4 0 8-3.6 8-8v8h304v-8c0 4.4 3.6 8 8 8h-8v72h72v-80c0-35.3-28.7-64-64-64H352c-35.3 0-64 28.7-64 64v80h72v-72zm504 72H160c-17.7 0-32 14.3-32 32v32c0 4.4 3.6 8 8 8h60.4l24.7 523c1.6 34.1 29.8 61 63.9 61h454c34.2 0 62.3-26.8 63.9-61l24.7-523H888c4.4 0 8-3.6 8-8v-32c0-17.7-14.3-32-32-32zM731.3 840H292.7l-24.2-512h487l-24.2 512z"></path>
+                </svg>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -65,6 +79,7 @@
       style="position: fixed; bottom: 0; left: 50%; transform: translate(-50%, 0px); z-index: 100;" v-if="displayAlert">
       You can upload a maximum of 50 images.
     </div>
+    <slot name="training" />
   </div>
 </template>
 <script setup>
@@ -153,6 +168,18 @@ const menuRef = ref(null);
 detectOutsideClick(menuRef, () => {
   showMenu.value = false;
 })
+
+const deleteImage = (i) => {
+  imageUrls.value.splice(i, 1);
+  images.value.splice(i, 1);
+}
+
+const deleteAllImages = () => {
+  imageUrls.value = []
+  while(images.value.length > 0) {
+      images.value.pop()
+  }
+}
 </script>
 <style lang="scss">
 .menu-btn {
