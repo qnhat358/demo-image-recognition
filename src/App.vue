@@ -102,7 +102,7 @@ const sendImageHandle = async () => {
         mode: "cors",
         body: imgFormData
       };
-     const res = await fetch(`https://86db-203-205-51-20.ngrok-free.app/upload?folder_name=${classItem.value.name}`, config)
+     const res = await fetch(`https://attendance-system.ily1606.space/upload?folder_name=${classItem.value.name}`, config)
      .then((res) => res.json());
      if(res?.message) {
       isSentMesasge.value = true 
@@ -117,10 +117,17 @@ const sendImageHandle = async () => {
 const trainModelHandle = async () => {
   isTraining.value = true;
 
-  await fetch("https://86db-203-205-51-20.ngrok-free.app/train_model")
+  await fetch("https://attendance-system.ily1606.space/train_model", {
+    method: 'POST',
+  })
   .then((res) => res.json())
   .then((res) => {
-    $toast.success(res.message, {position: 'bottom'});
+    const message = res[0].message
+    if(res[1] === 500) {
+      $toast.error(message, {position: 'bottom'})
+      return
+    }
+    $toast.success(message, {position: 'bottom'});
   })
   .catch((err) => {
     let message = err.message || "Error while fetching train model"
@@ -143,7 +150,7 @@ const previewCameraHandle = async () => {
       mode: "cors",
       body: imgFormData
     };
-    const response = await fetch('https://86db-203-205-51-20.ngrok-free.app/detect', config);
+    const response = await fetch('https://attendance-system.ily1606.space/detect', config);
     const jsonResponse = await response.json();
 
 
